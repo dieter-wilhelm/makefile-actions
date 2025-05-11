@@ -1,0 +1,15 @@
+name: Emacs
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+#    - uses: actions/checkout@v1
+#      with:
+#        fetch-depth: 1
+      - name: Install Emacs
+      - run: sudo apt install emacs
+      - run: emacs --version
+    
