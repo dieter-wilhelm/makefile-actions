@@ -7,6 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install Emacs
-      - run: sudo apt install emacs
-      - run: emacs --version
+        run: sudo apt install emacs
+        run: emacs --version
     
