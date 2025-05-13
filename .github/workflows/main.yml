@@ -26,3 +26,9 @@ jobs:
       - name: Run Makefile
         run: |
           make
+      # Step 4 (Optional): Archive or upload generated files
+      - name: Upload generated files as artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: generated-code
+          path: generated/
