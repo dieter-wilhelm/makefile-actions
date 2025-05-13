@@ -1,3 +1,4 @@
 .PHONEY : Test
 Test : 
-	echo "## This is a test" > test.R
+	mkdir -p generated
+	echo "## This is a test" > generated/test.R
