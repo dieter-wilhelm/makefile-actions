@@ -22,9 +22,11 @@ jobs:
 
     - name: Extract tag name from commit message
       id: extract_tag
-      # Look for a "Release" keyword followed by the tag name (e.g., "Release v1.0.0")
+      # Look for a "Release" keyword followed by the tag name (e.g.,
+      # "Release v1.0.0")
+      # "|| true" is necessary because grep exits 1 when no line is matched!
       run: |
-        tag_name=$(git log -1 --pretty=%B | grep -oP "Release \Kv[0-9]+\.[0-9]+\.[0-9]+")
+        tag_name=$(git log -1 --pretty=%B | grep -oP "Release \Kv[0-9]+\.[0-9]+\.[0-9]+" || true)
         if [ -n "$tag_name" ]; then
           echo "tag_name=$tag_name" >> $GITHUB_ENV
           echo "found=true" >> $GITHUB_ENV
@@ -32,7 +34,7 @@ jobs:
           echo "found=false" >> $GITHUB_ENV
         fi
       continue-on-error: false  # Ensure no error is thrown even if the keyword is not found
-
+      # above line "continue-on-error" should be redundant right now
     - name: Log that no action is required when keyword is not found
       if: env.found == 'false'
       run: echo "No matching keyword found in the commit message. No tag creation is required."
