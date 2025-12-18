@@ -32,7 +32,11 @@ jobs:
           echo "found=false" >> $GITHUB_ENV
         fi
 
-    - name: Create and push the tag
+    - name: Log that no action is required when keyword is not found
+      if: env.found == 'false'
+      run: echo "No matching keyword found in the commit message. No tag creation is required."
+
+    - name: Create and push the tag if keyword is found
       if: env.found == 'true'
       run: |
         echo "Tag name extracted: ${{ env.tag_name }}"
