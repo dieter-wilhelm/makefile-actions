@@ -1,0 +1,40 @@
+name: Create Tag on Keyword with Tag Name in Commit Message
+
+# Keywords: "Release v0.0.0" or "Release v1.10.100"
+
+on:
+  push:
+    branches:
+      - main  # Adjust this to specify the branch(es) to monitor
+
+jobs:
+  tag_on_keyword:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Git
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Extract tag name from commit message
+      id: extract_tag
+      run: |
+        # Look for a "Release" keyword followed by the tag name (e.g., "Release v1.0.0")
+        tag_name=$(git log -1 --pretty=%B | grep -oP "Release \Kv[0-9]+\.[0-9]+\.[0-9]+")
+        if [ -n "$tag_name" ]; then
+          echo "tag_name=$tag_name" >> $GITHUB_ENV
+          echo "found=true" >> $GITHUB_ENV
+        else
+          echo "found=false" >> $GITHUB_ENV
+        fi
+
+    - name: Create and push the tag
+      if: env.found == 'true'
+      run: |
+        echo "Tag name extracted: ${{ env.tag_name }}"
+        git tag -a ${{ env.tag_name }} -m "Automatically created tag ${{ env.tag_name }}"
+        git push origin ${{ env.tag_name }}
