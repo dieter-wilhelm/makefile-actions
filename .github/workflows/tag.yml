@@ -1,6 +1,5 @@
 name: Create Tag on Keyword with Tag Name in Commit Message
-
-# Keywords: "Release v0.0.0" or "Release v1.10.100"
+# Keywords look like: "Release v0.0.0" or "Release v1.10.100"
 
 on:
   push:
