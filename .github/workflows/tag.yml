@@ -31,6 +31,8 @@ jobs:
         else
           echo "found=false" >> $GITHUB_ENV
         fi
+      continue-on-error: false  # Ensure no error is thrown even if
+        # the keyword is not found
 
     - name: Log that no action is required when keyword is not found
       if: env.found == 'false'
