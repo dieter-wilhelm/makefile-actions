@@ -1,0 +1,79 @@
+# Trigger a release workflow when a tag matching v*.*.* is pushed
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+# Minimal permissions required to create releases and upload assets
+permissions:
+  contents: write   # needed to create a release + upload assets
+  packages: write   # optional, if you interact with packages
+  id-token: write   # optional, for OIDC flows if you need them
+
+jobs:
+  release:
+    name: Create Release from Tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # fetch all history so we can compute diffs and tags
+
+      - name: Setup git (ensure tags available)
+        run: |
+          git fetch --tags --prune
+
+      - name: Determine tag and generate release notes
+        id: gen_notes
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+          # Find previous tag (if any) for changelog range
+          PREV_TAG=$(git describe --tags --abbrev=0 "$GITHUB_REF^" 2>/dev/null || true)
+
+          if [ -n "$PREV_TAG" ]; then
+            RANGE="$PREV_TAG..$TAG"
+          else
+            # If no previous tag, list commits included in this tag (all history up to tag)
+            RANGE="$TAG"
+          fi
+
+          # Generate simple bullet list release notes (commit subject + author)
+          NOTES=$(git log --pretty=format:'- %s (%an)' $RANGE || echo "- No commits found")
+          # write multiline output
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ steps.gen_notes.outputs.tag }}
+          release_name: Release ${{ steps.gen_notes.outputs.tag }}
+          body: ${{ steps.gen_notes.outputs.notes }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # (Optional) Build artifacts to upload to the release
+      - name: Build artifact
+        if: always()  # change condition to suit your repo
+        run: |
+          mkdir -p artifacts
+          # Example: create a zip of the repo (replace with your real build)
+          zip -r artifacts/source-${GITHUB_REF_NAME}.zip .
+
+      - name: Upload release asset(s)
+        if: always()  # only run if you actually built artifacts
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/source-${{ github.ref_name }}.zip
+          asset_name: source-${{ github.ref_name }}.zip
+          asset_content_type: application/zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
