@@ -20,6 +20,9 @@ jobs:
         with:
           fetch-depth: 0  # fetch all history so we can compute diffs and tags
 
+          # ##############################
+          # we push the tags with $ git push --tags
+          # the following throws an error
 #      - name: Setup git (ensure tags available)
 #        run: |
 #          git fetch --tags --prune
@@ -59,13 +62,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # (Optional) Build artifacts to upload to the release
-      - name: Build artifact
-        if: always()  # change condition to suit your repo
-        run: |
-          mkdir -p artifacts
-          # Example: create a zip of the repo (replace with your real build)
-          zip -r artifacts/source-${GITHUB_REF_NAME}.zip . --exclude .git
+          # ##############################
+          # github builds zip and tar source archives by default
+
+      # # (Optional) Build artifacts to upload to the release
+      # - name: Build artifact
+      #   if: always()  # change condition to suit your repo
+      #   run: |
+      #     mkdir -p artifacts
+      #     # Example: create a zip of the repo (replace with your real build)
+      #     zip -r artifacts/source-${GITHUB_REF_NAME}.zip . --exclude .git
+
+      # ##############################
+      # what is the following for, from other sources ?
 
       # - name: Upload release asset(s)
       #   if: always()  # only run if you actually built artifacts
