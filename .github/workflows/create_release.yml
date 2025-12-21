@@ -20,9 +20,9 @@ jobs:
         with:
           fetch-depth: 0  # fetch all history so we can compute diffs and tags
 
-      - name: Setup git (ensure tags available)
-        run: |
-          git fetch --tags --prune
+#      - name: Setup git (ensure tags available)
+#        run: |
+#          git fetch --tags --prune
 
       - name: Determine tag and generate release notes
         id: gen_notes
@@ -65,15 +65,15 @@ jobs:
         run: |
           mkdir -p artifacts
           # Example: create a zip of the repo (replace with your real build)
-          zip -r artifacts/source-${GITHUB_REF_NAME}.zip .
+          zip -r artifacts/source-${GITHUB_REF_NAME}.zip . --exclude .git
 
-      - name: Upload release asset(s)
-        if: always()  # only run if you actually built artifacts
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/source-${{ github.ref_name }}.zip
-          asset_name: source-${{ github.ref_name }}.zip
-          asset_content_type: application/zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Upload release asset(s)
+      #   if: always()  # only run if you actually built artifacts
+      #   uses: actions/upload-release-asset@v1
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: ./artifacts/source-${{ github.ref_name }}.zip
+      #     asset_name: source-${{ github.ref_name }}.zip
+      #     asset_content_type: application/zip
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
